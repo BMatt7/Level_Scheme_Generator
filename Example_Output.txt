@@ -1,0 +1,34 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[version=3]{mhchem}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usepackage[margin=0.5cm]{geometry}
+\usetikzlibrary{arrows}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{arrows.meta,arrows}
+\begin{document}
+\begin{tikzpicture}
+%%Energy States
+\draw[very thick] (1,0) -- (2.5,0) node[pos=0.2,above]{0\textsuperscript{+}} -- (3,0)  -- (14,0) -- (14.5,0) -- (16,0) node[pos=0.5,above] {\ce{0}};
+
+\draw (1,8.57875) -- (2.5,8.57875) node[pos=0.2,above]{2\textsuperscript{+}} -- (3,8.57875)  -- (14,8.57875) -- (14.5,8.57875) -- (16,8.57875) node[pos=0.5,above] {\ce{686.3}};
+
+\draw (1,15.7879) -- (2.5,15.7879) node[pos=0.2,above]{2\textsuperscript{+}} -- (3,15.7879)  -- (14,15.7879) -- (14.5,15.7879) -- (16,15.7879) node[pos=0.5,above] {\ce{1263.03}};
+
+\draw (1,16.8262) -- (2.5,16.8262) node[pos=0.2,above]{4\textsuperscript{+}} -- (3,16.8262)  -- (14,16.8262) -- (14.5,16.8262) -- (16,16.8262) node[pos=0.5,above] {\ce{1346.1}};
+
+\draw[densely dashed] (1,17.7525) -- (2.5,17.7525) node[pos=0.2,above]{3\textsuperscript{+}} -- (3,17.7525)  -- (14,17.7525) -- (14.5,17.7525) -- (16,17.7525) node[pos=0.5,above] {\ce{1420.2}};
+
+\draw[very thick] (1,19.0437) -- (2.5,19.0437) node[pos=0.2,above]{6\textsuperscript{+}} -- (3,19.0437)  -- (14,19.0437) -- (14.5,19.0437) -- (16,19.0437) node[pos=0.5,above] {\ce{1523.5}};
+
+\draw[very thick] (1,19.5938) -- (2.5,19.5938) node[pos=0.2,above]{8\textsuperscript{+}} -- (3,19.1938)  -- (14,19.1938) -- (14.5,19.5938) -- (16,19.5938) node[pos=0.5,above] {\ce{1528.4}};
+
+\draw[red,->] (14,8.57875) -- (14,0) node[pos=0.0,right,rotate=60,black,fill=white]{686.3 97.6};
+
+\draw[red,->] (13.5,16.8262) -- (13.5,8.57875) node[pos=0.0,right,rotate=60,black,fill=white]{659.8 89};
+
+\draw[red,->] (13,19.0437) -- (13,16.8262) node[pos=0.0,right,rotate=60,black,fill=white]{177.4 48.6};
+
+\end{tikzpicture}
+\end{document}
