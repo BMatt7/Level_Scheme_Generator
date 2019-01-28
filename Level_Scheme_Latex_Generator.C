@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
 	string transitions_filename = "default.txt";
 	string out_filename = "default.txt";
 	bool thick_arrows = false;
+	string thicc;
 	
 	for(int i = 0; i < argc; i++)
 	{
@@ -48,7 +49,12 @@ int main(int argc, char* argv[])
 		if((string)argv[i] == "-l" || (string)argv[i] == "--levels") levels_filename = (string)argv[i+1];
 		if((string)argv[i] == "-t" || (string)argv[i] == "--transitions") transitions_filename = (string)argv[i+1];
 		if((string)argv[i] == "-of" || (string)argv[i] == "--outputfile") out_filename = (string)argv[i+1];
-		if((string)argv[i] == "-thicc" || (string)argv[i] == "--thiccarrows") thick_arrows = true;
+		if((string)argv[i] == "-thicc" || (string)argv[i] == "--thiccarrows"){
+		
+			thick_arrows = true;
+			thicc = (string)argv[i+1];
+			
+		}
 		
 	}
 
@@ -99,7 +105,7 @@ int main(int argc, char* argv[])
     double flat_part = 1.5;
     double line_length = 16; // max 18
    	double shift = 0.5; // in cm
-   	double max_thickness = shift*60; // in mm
+   	double max_thickness = stof(thicc); // in mm
 
     vector<vector<double>> a;
     vector<double> energy_state_vec;
