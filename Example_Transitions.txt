@@ -1,8 +1,8 @@
-# Start_State	End_State	Intensity
+# Start_State	End_State	Intensity 	Dashed?
 #
 # 686.3
-	686.3		0.0 		97.6
+	686.3		0.0 		97.6		1
 # 659.8
-	1346.1		686.3 		89.0
+	1346.1		686.3 		89.0		0
 # 177.4
-	1523.5 		1346.1 		48.6
+	1523.5 		1346.1 		48.6		0

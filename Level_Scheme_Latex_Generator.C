@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
 	string out_filename = "default.txt";
 	bool thick_arrows = false;
 	string thicc;
+	bool intensities_enabled = false;
 	
 	for(int i = 0; i < argc; i++)
 	{
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
 			thicc = (string)argv[i+1];
 			
 		}
+		if((string)argv[i] == "-int" || (string)argv[i] == "--intensities") intensities_enabled = true;
 		
 	}
 
@@ -76,7 +78,7 @@ int main(int argc, char* argv[])
         exit(0);
     }
     
-	ofs<<"\\documentclass[11pt]{article}"<<endl;
+	ofs<<"\\documentclass[10pt]{article}"<<endl;
 	ofs<<"\\usepackage[T1]{fontenc}"<<endl;
 	ofs<<"\\usepackage[version=3]{mhchem}"<<endl;
 	ofs<<"\\usepackage{siunitx}"<<endl;
@@ -93,8 +95,8 @@ int main(int argc, char* argv[])
 	ofs<<"%%Energy States"<<endl;
 	
 	
-	const char* format = "%lf %lf %lf %lf";
-	const char* format_2 = "%lf %lf %lf";
+	const char* format = "%lf %s %lf";
+	const char* format_2 = "%lf %lf %lf %lf";
 	
 	int num_states = 0;
 	int num_transitions = 0;
@@ -110,15 +112,14 @@ int main(int argc, char* argv[])
 
     vector<vector<double>> a;
     vector<double> energy_state_vec;
-    vector<double> spin_vec;
-    vector<double> parity_vec;
+    vector<string> spin_parity_vec;
     vector<double> line_type_vec;
     
     vector<vector<double>> b;
     vector<double> initial_state_vec;
     vector<double> final_state_vec;
     vector<double> intensity_vec;
-    
+    vector<double> arrow_type_vec;
     
 	int n = 0;
 	double prev_energy = -10000.0;
@@ -135,13 +136,13 @@ int main(int argc, char* argv[])
     
     
     double energy_of_state;
-    double spin;
-    double parity;
+    char spin_parity[256];
     double line_type;
     
     double initial_state;
     double final_state;
     double intensity;
+    double arrow_type;
 
     
 
@@ -150,11 +151,11 @@ int main(int argc, char* argv[])
         getline(lfs,line,'\n');
         if (lfs.eof()) break;
         if(line[0] == '#') continue;
-        sscanf(line.c_str(),format, &energy_of_state, &spin, &parity, &line_type);
+        
+        sscanf(line.c_str(), format, &energy_of_state, spin_parity, &line_type);
 		
 		energy_state_vec.push_back(energy_of_state);
-		spin_vec.push_back(spin);
-		parity_vec.push_back(parity);
+		spin_parity_vec.push_back(spin_parity);
 		line_type_vec.push_back(line_type);
 		
 		num_states++;
@@ -162,8 +163,6 @@ int main(int argc, char* argv[])
 	}
 	
 	a.push_back(energy_state_vec);
-	a.push_back(spin_vec);
-	a.push_back(parity_vec);
 	a.push_back(line_type_vec);
 	
 	
@@ -172,12 +171,13 @@ int main(int argc, char* argv[])
         getline(tfs,line,'\n');
         if (tfs.eof()) break;
         if(line[0] == '#') continue;
-        sscanf(line.c_str(),format_2, &initial_state, &final_state, &intensity);
+        sscanf(line.c_str(),format_2, &initial_state, &final_state, &intensity, &arrow_type);
 		
 		initial_state_vec.push_back(initial_state);
 		final_state_vec.push_back(final_state);
 		intensity_vec.push_back(intensity);
-		
+		arrow_type_vec.push_back(arrow_type);
+				
 		num_transitions++;
 	
 	}
@@ -185,19 +185,19 @@ int main(int argc, char* argv[])
 	b.push_back(initial_state_vec);
 	b.push_back(final_state_vec);
 	b.push_back(intensity_vec);
-	
+	b.push_back(arrow_type_vec);
 	
 	for(int i = 0; i < num_states; ++i){
 
-		cout<<a[0][i]<<" "<<a[1][i]<<" "<<a[2][i]<<" "<<a[3][i]<<" "<<endl;
+		//cout<<a[0][i]<<" "<<spin_parity_vec[i]<<" "<<a[1][i]<<" "<<endl;
 
 	}
 		
 	for(int i = 0; i < num_transitions; ++i){
 	
-		cout<<endl;
+		//cout<<endl;
 
-		cout<<b[0][i]<<" "<<b[1][i]<<" "<<b[2][i]<<" "<<endl;
+		//cout<<b[0][i]<<" "<<b[1][i]<<" "<<b[2][i]<<" "<<endl;
 
 	}
 	
@@ -218,6 +218,8 @@ int main(int argc, char* argv[])
 	
 	int last_placed = 0;
 	
+	string spin_parity_substring;
+	
 	
 	while(transitions_unplaced){
 	
@@ -227,9 +229,9 @@ int main(int argc, char* argv[])
 	
 	for(int i = 0; i < num_states; ++i){
 	
-	    if(a[3][i] == 0) ofs<<"\\draw ";
-        else if(a[3][i] == 1) ofs<<"\\draw[very thick] ";
-        else if(a[3][i] == 2) ofs<<"\\draw[densely dashed] ";
+	    if(a[1][i] == 0) ofs<<"\\draw ";
+        else if(a[1][i] == 1) ofs<<"\\draw[very thick] ";
+        else if(a[1][i] == 2) ofs<<"\\draw[densely dashed] ";
         
         if(a[0][i]/max_energy <= prev_level_height + 0.55){
         
@@ -245,12 +247,26 @@ int main(int argc, char* argv[])
         	correction = 0.0;
         }
         
+        for(int sp = 0; sp < spin_parity_vec[i].length(); ++sp){
+        
+        	if(spin_parity_vec[i][sp] == '+' && spin_parity_vec[i][sp-1] != '{'){
+        		
+        		spin_parity_vec[i].replace(sp, 1, "\\textsuperscript{+}");
+        
+        	}
+        	if(spin_parity_vec[i][sp] == '-' && spin_parity_vec[i][sp-1] != '{'){
+        	
+        		spin_parity_vec[i].replace(sp, 1, "\\textsuperscript{-}");
+        		
+        	}
+        
+        }
 
         
-        ofs<<"(1,"<<height<<") -- ("<<1+flat_part<<","<<height<<") node[pos=0.2,above]{"<<a[1][i]<<"\\textsuperscript{";
+        ofs<<"(1,"<<height<<") -- ("<<1+flat_part<<","<<height<<") node[pos=0.2,above]{"<<spin_parity_vec[i]<<"} -- (";  //a[1][i]<<"\\textsuperscript{";
         
-        if(a[2][i] == 1) ofs<<"+}} -- (";
-        else if(a[2][i] == 0) ofs<<"-}} -- (";
+        //if(a[2][i] == 1) ofs<<"+}} -- (";
+        //else if(a[2][i] == 0) ofs<<"-}} -- (";
         
         
         ofs<<flat_part+1.5<<","<<height-correction<<")  -- ("<<line_length-flat_part-0.5<<","<<height-correction<<") -- ("<<line_length-flat_part<<","<<height<<") -- ("<<line_length<<","<<height<<") node[pos=0.5,above] {\\ce{"<<a[0][i]<<"}};";
@@ -272,7 +288,7 @@ int main(int argc, char* argv[])
 		
 	for(int j = last_placed; j < num_transitions; ++j){
 	
-				cout<<b[0][j]<<" "<<b[1][j]<<" "<<b[2][j]<<" "<<endl;
+				//cout<<b[0][j]<<" "<<b[1][j]<<" "<<b[2][j]<<" "<<endl;
 			
 				energy_found = false;
 				value = 0;
@@ -289,7 +305,7 @@ int main(int argc, char* argv[])
 				
 				while(!energy_found){
 
-					cout<<"Up En: "<<b[0][j]<<"   Low En: "<<b[1][j]<<" Level: "<<levels[value]<<"  "<<value<<endl;
+					//cout<<"Up En: "<<b[0][j]<<"   Low En: "<<b[1][j]<<" Level: "<<levels[value]<<"  "<<value<<endl;
 
 					if(levels[value] < b[1][j]){
 
@@ -305,14 +321,14 @@ int main(int argc, char* argv[])
 				
 						shift_checker[value] += shift_amount;
 				
-						cout<<"Shift Checker Increased: "<<value<<" "<<shift_checker[value]<<endl;
+						//cout<<"Shift Checker Increased: "<<value<<" "<<shift_checker[value]<<endl;
 					 
 						if (num_shifts < shift_checker[value]){
 						 
 						 
 							num_shifts = shift_checker[value];
 			
-							cout<<"num_shifts = "<<num_shifts<<endl;
+							//cout<<"num_shifts = "<<num_shifts<<endl;
 			
 						}
 						else if (num_shifts > shift_checker[value]) shift_checker[value] = num_shifts;
@@ -329,17 +345,20 @@ int main(int argc, char* argv[])
 				//else if(b[2][j] >= 15 && line_length-flat_part-(num_shifts*shift)-(1.4*(max_thickness*(b[2][j]/100.0))) <= flat_part) new_scheme = true;
 				if(new_scheme){
 				
-					cout<<"NEW LEVEL SCHEME WOO!!!!!"<<endl;
+					cout<<"NEW LEVEL CREATED"<<endl;
 					last_placed = j;
 					break;
 					
 				}
+				
+				if(b[3][j] == 1 && (!thick_arrows || (thick_arrows && b[2][j] < 15))) ofs<<"\\draw[densely dashed, ";
+				else	ofs<<"\\draw[";
 		
 				if(!thick_arrows){
 
-					if(b[2][j] >= 15) ofs<<"\\draw[red,->] ";
-					else if(b[2][j] >= 5) ofs<<"\\draw[blue,->] ";
-					else ofs<<"\\draw[->] ";
+					if(b[2][j] >= 15) ofs<<"red,->] ";
+					else if(b[2][j] >= 5) ofs<<"blue,->] ";
+					else ofs<<"->] ";
 			
 					ofs<<"("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[end_energy]<<") -- ("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[start_energy]<<") node[pos=0.0,right,rotate=60,black,fill=white]{"<<b[0][j]-b[1][j]<<" "<<b[2][j]<<"};";
 	
@@ -350,17 +369,19 @@ int main(int argc, char* argv[])
 				
 					if(b[2][j] >= 15){
 				
-						ofs<<"\\draw[>={Triangle[width="<<1.4*(max_thickness*(b[2][j]/100.0))<<"mm,length="<<2.0*(heights_vec[end_energy] - heights_vec[start_energy])<<"mm]}, line width="<<max_thickness*(b[2][j]/100.0)<<"mm,->] ";
+						ofs<<">={Triangle[width="<<1.4*(max_thickness*(b[2][j]/100.0))<<"mm,length="<<2.0*(heights_vec[end_energy] - heights_vec[start_energy])<<"mm]}, line width="<<max_thickness*(b[2][j]/100.0)<<"mm,->] ";
 				
 						ofs<<"("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[end_energy]<<") -- ("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[start_energy]<<") node[pos=0.5,black,fill=white]{"<<b[0][j]-b[1][j]<<"};";
 	
 					}	
 					else{
 				
-						ofs<<"\\draw[->] ";
+						ofs<<"->] ";
 				
-						ofs<<"("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[end_energy]<<") -- ("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[start_energy]<<") node[pos=0.0,right,rotate=60,black,fill=white]{"<<b[0][j]-b[1][j]<<" "<<b[2][j]<<"};";
-	
+						ofs<<"("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[end_energy]<<") -- ("<<line_length-flat_part-(num_shifts*shift)<<","<<heights_vec[start_energy]<<") node[pos=0.0,right,rotate=60,black,fill=white]{"<<b[0][j]-b[1][j];
+						
+						if(intensities_enabled) ofs<<" "<<b[2][j]<<"};";
+						else ofs<<"};";
 				
 					}
 		
