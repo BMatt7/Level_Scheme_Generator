@@ -105,7 +105,8 @@ int main(int argc, char* argv[])
     double flat_part = 1.5;
     double line_length = 16; // max 18
    	double shift = 0.5; // in cm
-   	double max_thickness = stof(thicc); // in mm
+   	double max_thickness;
+   	if(thick_arrows) max_thickness = stof(thicc); // in mm 
 
     vector<vector<double>> a;
     vector<double> energy_state_vec;
